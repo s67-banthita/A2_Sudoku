@@ -25,6 +25,12 @@ void drawGrid() {
     line(i * 50, 0, i * 50, 450); // draw line Vertical
     line(0, i * 50, 450, i * 50); // draw line Horizon
   }
+    if (selectedRow >= 0 && selectedCol >= 0) {
+    stroke(255, 182, 193); // cute pink
+    strokeWeight(2);
+    noFill();
+    rect(selectedCol * 50, selectedRow * 50, 50, 50); // draw frame
+  }
 }
 
 
