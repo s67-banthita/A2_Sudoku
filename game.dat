@@ -1,7 +1,9 @@
 int [][] boardGame = new int [9][9];
+int selectedRow = -1; 
+int selectedCol = -1; 
 
 
-void setup(){
+void setup() {
   size(450, 500);
   background(255);
   fillRandomNumbers();
@@ -80,4 +82,23 @@ boolean correctPosition(int num, int row, int col) {
   }
   
   return true; // can fill numbers
+}
+
+
+void mousePressed() {
+  
+  selectedCol = mouseX / 50;
+  selectedRow = mouseY / 50;
+}
+
+
+void keyPressed() {
+  if (selectedRow >= 0 && selectedRow < 9 && selectedCol >= 0 && selectedCol < 9) {
+    if (key >= '1' && key <= '9') {
+      int num = Character.getNumericValue(key); 
+      if (correctPosition(num, selectedRow, selectedCol)) {
+        boardGame[selectedRow][selectedCol] = num; 
+      }
+    }
+  }
 }
