@@ -29,12 +29,16 @@ void drawGrid() {
 void fillRandomNumbers() {
   for (int i = 0; i < 9; i++) {
     for (int j = 0; j < 9; j++) {
-      if (random(1) > 0.7) { 
-        boardGame[i][j] = (int)random(1, 10); 
+      if (random(1) > 0.7) { // about 30% will fill numbers
+        int num = (int)random(1, 10); 
+        if (correctPosition(num, i, j)) {
+          boardGame[i][j] = num; // fill numbers if is correct
+        }
       }
     }
   }
 }
+
 
 
 void drawNumbers() {
@@ -47,4 +51,33 @@ void drawNumbers() {
       }
     }
   }
+}
+
+
+boolean correctPosition(int num, int row, int col) {
+  for (int j = 0; j < 9; j++) {
+    if (boardGame[row][j] == num) { // check row
+      return false;
+    }
+  }
+  
+  
+  for (int i = 0; i < 9; i++) {
+    if (boardGame[i][col] == num) { // check column
+      return false;
+    }
+  }
+  
+  
+  int startRow = row - row % 3;
+  int startCol = col - col % 3;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (boardGame[i + startRow][j + startCol] == num) { // check block 3 * 3
+        return false; 
+      }
+    }
+  }
+  
+  return true; // can fill numbers
 }
