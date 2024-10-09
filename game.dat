@@ -1,4 +1,5 @@
 int [][] boardGame = new int [9][9];
+boolean [][] cantEdit = new boolean [9][9];
 int selectedRow = -1; 
 int selectedCol = -1; 
 
@@ -41,6 +42,9 @@ void fillRandomNumbers() {
         int num = (int)random(1, 10); 
         if (correctPosition(num, i, j)) {
           boardGame[i][j] = num; // fill numbers if is correct
+          cantEdit[i][j] = false;
+        }else{
+        cantEdit[i][j] = true;
         }
       }
     }
@@ -100,10 +104,12 @@ void mousePressed() {
 
 void keyPressed() {
   if (selectedRow >= 0 && selectedRow < 9 && selectedCol >= 0 && selectedCol < 9) {
-    if (key >= '1' && key <= '9') {
-      int num = Character.getNumericValue(key); 
-      if (correctPosition(num, selectedRow, selectedCol)) {
-        boardGame[selectedRow][selectedCol] = num; 
+    if (cantEdit[selectedRow][selectedCol]) { //check if the cell is editable
+      if (key >= '1' && key <= '9') {
+        int num = Character.getNumericValue(key); 
+        if (correctPosition(num, selectedRow, selectedCol)) {
+          boardGame[selectedRow][selectedCol] = num; 
+        }
       }
     }
   }
