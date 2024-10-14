@@ -1,13 +1,14 @@
-int [][] boardGame = new int [9][9];
-boolean [][] cantEdit = new boolean [9][9];
-int selectedRow = -1; 
-int selectedCol = -1; 
+int[][] boardGame = new int[9][9];
+boolean[][] cantEdit = new boolean[9][9];
+boolean isEasyMode = false;
+int selectedRow = -1;
+int selectedCol = -1;
 
 
 void setup() {
-  size(450, 500);
+  size(450, 550);
   background(255);
-  fillRandomNumbers();
+  resetBoard(); 
 }
 
 
@@ -15,50 +16,99 @@ void draw() {
   background(255);
   drawGrid();
   drawNumbers();
+  drawButtons();
+}
+
+
+void drawButtons() {
+  fill(173, 216, 230);
+  rect(100, 460, 100, 40); // Easy
+  fill(0);
+  textSize(20);
+  text("Very Easy", 130, 490);
+
+
+  fill(255, 160, 122);
+  rect(250, 460, 100, 40); // Difficult
+  fill(0);
+  textSize(20);
+  text("Difficult", 270, 490);
 }
 
 
 void drawGrid() {
   stroke(0);
+  
+  
   for (int i = 0; i < 10; i++) {
-    strokeWeight(i % 3 == 0 ? 4 : 1);  // i % 3 = 0 is big line
-
-    line(i * 50, 0, i * 50, 450); // draw line Vertical
-    line(0, i * 50, 450, i * 50); // draw line Horizon
+    strokeWeight(i % 3 == 0 ? 4 : 1); 
+    line(i * 50, 0, i * 50, 450); 
+    line(0, i * 50, 450, i * 50); 
   }
-    if (selectedRow >= 0 && selectedCol >= 0) {
-    stroke(255, 182, 193); // cute pink
+  if (selectedRow >= 0 && selectedCol >= 0) {
+    stroke(255, 182, 193); 
     strokeWeight(2);
     noFill();
-    rect(selectedCol * 50, selectedRow * 50, 50, 50); // draw frame
+    rect(selectedCol * 50, selectedRow * 50, 50, 50); 
   }
 }
 
 
-void fillRandomNumbers() {
-  for (int i = 0; i < 9; i++) {
-    for (int j = 0; j < 9; j++) {
-      if (random(1) > 0.7) { // about 30% will fill numbers
-        int num = (int)random(1, 10); 
-        if (correctPosition(num, i, j)) {
-          boardGame[i][j] = num; // fill numbers if is correct
-          cantEdit[i][j] = false;
-        }else{
-        cantEdit[i][j] = true;
-        }
-      }
+boolean fillCompleteBoard() {
+  return fillBoard(0, 0);
+}
+
+
+boolean fillBoard(int row, int col) {
+  if (row == 9) return true; 
+  if (col == 9) return fillBoard(row + 1, 0); 
+
+  if (boardGame[row][col] != 0) return fillBoard(row, col + 1);
+
+  Integer[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  numbers = shuffleArray(numbers); 
+
+  for (int num : numbers) {
+    if (isSafe(row, col, num)) {
+      boardGame[row][col] = num; 
+      if (fillBoard(row, col + 1)) return true;
+
+      boardGame[row][col] = 0; 
     }
   }
+  return false; 
 }
 
+
+boolean isSafe(int row, int col, int num) {
+  for (int j = 0; j < 9; j++) {
+    if (boardGame[row][j] == num) return false; 
+  }
+  for (int i = 0; i < 9; i++) {
+    if (boardGame[i][col] == num) return false; 
+  }
+
+  int startRow = row - row % 3;
+  int startCol = col - col % 3;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (boardGame[i + startRow][j + startCol] == num) return false; 
+    }
+  }
+  return true; 
+}
 
 
 void drawNumbers() {
   textSize(33);
+  
+  
   for (int i = 0; i < 9; i++) {
     for (int j = 0; j < 9; j++) {
       if (boardGame[i][j] != 0) {
-        fill(0); 
+   
+        
+        fill(cantEdit[i][j] ? color(0) : color(0, 128, 0)); 
         text(boardGame[i][j], j * 50 + 15, i * 50 + 35); 
       }
     }
@@ -66,51 +116,94 @@ void drawNumbers() {
 }
 
 
-boolean correctPosition(int num, int row, int col) {
-  for (int j = 0; j < 9; j++) {
-    if (boardGame[row][j] == num) { // check row
-      return false;
-    }
+
+void mousePressed() {
+  int col = mouseX / 50;
+  int row = mouseY / 50;
+
+  if (row >= 0 && row < 9 && col >= 0 && col < 9) {
+    selectedCol = col;
+    selectedRow = row;
   }
-  
-  
-  for (int i = 0; i < 9; i++) {
-    if (boardGame[i][col] == num) { // check column
-      return false;
-    }
+
+  if (mouseX > 100 && mouseX < 200 && mouseY > 460 && mouseY < 500) {
+    isEasyMode = true;
+    resetBoard(); 
+  } else if (mouseX > 250 && mouseX < 350 && mouseY > 460 && mouseY < 500) {
+    isEasyMode = false;
+    resetBoard(); 
   }
-  
-  
-  int startRow = row - row % 3;
-  int startCol = col - col % 3;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      if (boardGame[i + startRow][j + startCol] == num) { // check block 3 * 3
-        return false; 
-      }
-    }
-  }
-  
-  return true; // can fill numbers
 }
 
 
-void mousePressed() {
+void resetBoard() {
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 9; j++) {
+      boardGame[i][j] = 0;
+      cantEdit[i][j] = false; // Reset cantEdit for all cells
+    }
+  }
+  fillCompleteBoard(); 
   
-  selectedCol = mouseX / 50;
-  selectedRow = mouseY / 50;
+  if (isEasyMode) {
+    removeNumbers((int) random(10, 13)); 
+  } else {
+    removeNumbers(63); 
+  }
+
+  // Mark the remaining numbers as uneditable
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 9; j++) {
+      if (boardGame[i][j] != 0) {
+        cantEdit[i][j] = true;
+      }
+    }
+  }
+}
+
+
+void removeNumbers(int count) {
+  int removed = 0;
+  while (removed < count) {
+    int row = (int) random(9);
+    int col = (int) random(9);
+    if (boardGame[row][col] != 0) {
+      cantEdit[row][col] = false; 
+      boardGame[row][col] = 0; 
+      removed++;
+    }
+  }
 }
 
 
 void keyPressed() {
   if (selectedRow >= 0 && selectedRow < 9 && selectedCol >= 0 && selectedCol < 9) {
-    if (cantEdit[selectedRow][selectedCol]) { //check if the cell is editable
+    if (!cantEdit[selectedRow][selectedCol]) { 
       if (key >= '1' && key <= '9') {
         int num = Character.getNumericValue(key); 
-        if (correctPosition(num, selectedRow, selectedCol)) {
+        if (isSafe(selectedRow, selectedCol, num)) {
           boardGame[selectedRow][selectedCol] = num; 
+        } else {
+          println("Invalid number in this block!");
         }
+      } else if (key == BACKSPACE) {
+        boardGame[selectedRow][selectedCol] = 0; 
+        cantEdit[selectedRow][selectedCol] = false; 
       }
+    } else {
+      println("This block cannot be edited!");
     }
   }
+}
+
+
+// Helper function to shuffle an array
+Integer[] shuffleArray(Integer[] array) {
+  for (int i = array.length - 1; i > 0; i--) {
+    int j = (int) random(i + 1);
+    int temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
 }
