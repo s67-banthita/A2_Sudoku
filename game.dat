@@ -3,6 +3,7 @@ boolean[][] cantEdit = new boolean[9][9];
 boolean isEasyMode = false;
 int selectedRow = -1;
 int selectedCol = -1;
+int wrongAttempts = 0;
 
 
 void setup() {
@@ -17,6 +18,18 @@ void draw() {
   drawGrid();
   drawNumbers();
   drawButtons();
+  
+  if (isBoardFull() && isSolutionCorrect()) {
+    background(255, 182, 193);
+    fill(250, 27, 140);
+    textSize(45);
+    text("You Win!", 130, 250);
+    
+    textSize(20);
+    text("Wrong Attempts: " + wrongAttempts, 130, 300);
+    
+    noLoop(); 
+  }
 }
 
 
@@ -25,7 +38,7 @@ void drawButtons() {
   rect(100, 460, 100, 40); // Easy
   fill(0);
   textSize(20);
-  text("Very Easy", 130, 490);
+  text("Easy", 130, 490);
 
 
   fill(255, 160, 122);
@@ -185,6 +198,7 @@ void keyPressed() {
           boardGame[selectedRow][selectedCol] = num; 
         } else {
           println("Invalid number in this block!");
+          wrongAttempts++; 
         }
       } else if (key == BACKSPACE) {
         boardGame[selectedRow][selectedCol] = 0; 
@@ -197,6 +211,7 @@ void keyPressed() {
 }
 
 
+
 // Helper function to shuffle an array
 Integer[] shuffleArray(Integer[] array) {
   for (int i = array.length - 1; i > 0; i--) {
@@ -206,4 +221,33 @@ Integer[] shuffleArray(Integer[] array) {
     array[j] = temp;
   }
   return array;
+}
+
+
+boolean isBoardFull() {
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 9; j++) {
+      if (boardGame[i][j] == 0) {
+        return false; // if some block is 0 = still not full
+      }
+    }
+  }
+  return true; // fill all
+}
+
+
+// This function check numbers that it is correct all or not
+boolean isSolutionCorrect() {
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 9; j++) {
+      int num = boardGame[i][j];
+      boardGame[i][j] = 0; 
+      if (!isSafe(i, j, num)) {
+        boardGame[i][j] = num; 
+        return false; 
+      }
+      boardGame[i][j] = num; 
+    }
+  }
+  return true; // All numbers is correct
 }
