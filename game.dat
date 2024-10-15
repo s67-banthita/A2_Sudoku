@@ -40,12 +40,24 @@ void drawButtons() {
   textSize(20);
   text("Easy", 130, 490);
 
-
   fill(255, 160, 122);
   rect(250, 460, 100, 40); // Difficult
   fill(0);
   textSize(20);
   text("Difficult", 270, 490);
+  
+  
+  fill(144, 238, 144); 
+  rect(50, 510, 100, 40);
+  fill(0);
+  textSize(20);
+  text("Save", 85, 540); //Save
+  
+  fill(240, 230, 140); 
+  rect(300, 510, 100, 40);
+  fill(0);
+  textSize(20);
+  text("Load", 335, 540); // Load
 }
 
 
@@ -145,6 +157,16 @@ void mousePressed() {
   } else if (mouseX > 250 && mouseX < 350 && mouseY > 460 && mouseY < 500) {
     isEasyMode = false;
     resetBoard(); 
+  }
+  
+  // Detects clicks on the save button
+  if (mouseX > 50 && mouseX < 150 && mouseY > 510 && mouseY < 550) {
+    saveGame();
+  }
+
+  // Detects clicks on the load button
+  if (mouseX > 300 && mouseX < 400 && mouseY > 510 && mouseY < 550) {
+    loadGame();
   }
 }
 
@@ -250,4 +272,65 @@ boolean isSolutionCorrect() {
     }
   }
   return true; // All numbers is correct
+} 
+
+
+void saveGame() {
+  PrintWriter output = createWriter("saved_game.txt");
+  
+  // Save the board
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 9; j++) {
+      output.print(boardGame[i][j] + " ");
+    }
+    output.println(); 
+  }
+
+  // Save cantEdit array
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 9; j++) {
+      output.print(cantEdit[i][j] ? "1 " : "0 ");
+    }
+    output.println();
+  }
+
+  // Save additional information
+  output.println(isEasyMode ? "1" : "0"); // Save isEasyMode
+  output.println(wrongAttempts);          // Save wrongAttempts
+
+  output.flush();
+  output.close();
+  println("Game saved!");
+}
+
+
+void loadGame() {
+  String[] lines = loadStrings("saved_game.txt");
+  if (lines == null) {
+    println("No saved game found.");
+    return;
+  }
+
+  // Load the board
+  for (int i = 0; i < 9; i++) {
+    String[] nums = split(lines[i], ' ');
+    for (int j = 0; j < 9; j++) {
+      boardGame[i][j] = int(nums[j]);
+    }
+  }
+
+  // Load cantEdit array
+  for (int i = 0; i < 9; i++) {
+    String[] edits = split(lines[i + 9], ' ');
+    for (int j = 0; j < 9; j++) {
+      cantEdit[i][j] = edits[j].equals("1");
+    }
+  }
+
+  // Load additional information
+  isEasyMode = lines[18].equals("1"); // Load isEasyMode
+  wrongAttempts = int(lines[19]);     // Load wrongAttempts
+
+  redraw(); // Update the game display
+  println("Game loaded!");
 }
