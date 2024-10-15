@@ -1,6 +1,7 @@
 int[][] boardGame = new int[9][9];
 boolean[][] cantEdit = new boolean[9][9];
 boolean isEasyMode = false;
+boolean isGameStarted = false;
 int selectedRow = -1;
 int selectedCol = -1;
 int wrongAttempts = 0;
@@ -8,27 +9,29 @@ int wrongAttempts = 0;
 
 void setup() {
   size(450, 550);
-  background(255);
   resetBoard(); 
+  drawStartButton();
 }
 
 
 void draw() {
-  background(255);
-  drawGrid();
-  drawNumbers();
-  drawButtons();
-  
-  if (isBoardFull() && isSolutionCorrect()) {
-    background(255, 182, 193);
-    fill(250, 27, 140);
-    textSize(45);
-    text("You Win!", 130, 250);
+  if (isGameStarted) {
+    background(255);
+    drawGrid();
+    drawNumbers();
+    drawButtons();
     
-    textSize(20);
-    text("Wrong Attempts: " + wrongAttempts, 130, 300);
-    
-    noLoop(); 
+    if (isBoardFull() && isSolutionCorrect()) {
+      background(255, 182, 193);
+      fill(250, 27, 140);
+      textSize(45);
+      text("You Win!", 130, 250);
+      
+      textSize(20);
+      text("Wrong Attempts: " + wrongAttempts, 130, 300);
+      
+      noLoop(); 
+    }
   }
 }
 
@@ -61,10 +64,31 @@ void drawButtons() {
 }
 
 
+void drawStartButton() {
+  background(255, 209, 220);
+  textAlign(CENTER);
+  
+  // Start button
+  fill(195, 177, 225);
+  strokeWeight(5);
+  rect(130, 125, 190, 65);
+  fill(0);
+  textSize(30);
+  text("Start Game", width / 2, 165);
+  
+  // Instructure
+  textSize(20);
+  text("Fill a 9x9 grid so that each row, column\n and 3x3 box contains number 1-9 without repeats.", width / 2, 270);
+  textSize(40);
+  text("Click to Start !", width /2 , 430);
+  
+  textAlign(LEFT); // to reset
+}
+
+
 void drawGrid() {
   stroke(0);
-  
-  
+    
   for (int i = 0; i < 10; i++) {
     strokeWeight(i % 3 == 0 ? 4 : 1); 
     line(i * 50, 0, i * 50, 450); 
@@ -113,6 +137,7 @@ boolean isSafe(int row, int col, int num) {
     if (boardGame[i][col] == num) return false; 
   }
 
+
   int startRow = row - row % 3;
   int startCol = col - col % 3;
   for (int i = 0; i < 3; i++) {
@@ -141,32 +166,39 @@ void drawNumbers() {
 }
 
 
-
 void mousePressed() {
   int col = mouseX / 50;
   int row = mouseY / 50;
-
-  if (row >= 0 && row < 9 && col >= 0 && col < 9) {
-    selectedCol = col;
-    selectedRow = row;
-  }
-
-  if (mouseX > 100 && mouseX < 200 && mouseY > 460 && mouseY < 500) {
-    isEasyMode = true;
-    resetBoard(); 
-  } else if (mouseX > 250 && mouseX < 350 && mouseY > 460 && mouseY < 500) {
-    isEasyMode = false;
-    resetBoard(); 
+  
+  
+  if (isGameStarted) {
+    if (row >= 0 && row < 9 && col >= 0 && col < 9) {
+      selectedCol = col;
+      selectedRow = row;
+    }
+  
+    if (mouseX > 100 && mouseX < 200 && mouseY > 460 && mouseY < 500) {
+      isEasyMode = true;
+      resetBoard(); 
+    } else if (mouseX > 250 && mouseX < 350 && mouseY > 460 && mouseY < 500) {
+      isEasyMode = false;
+      resetBoard(); 
+    }
+    
+    // Detects clicks on the save button
+    if (mouseX > 50 && mouseX < 150 && mouseY > 510 && mouseY < 550) {
+      saveGame();
+    }
+  
+    // Detects clicks on the load button
+    if (mouseX > 300 && mouseX < 400 && mouseY > 510 && mouseY < 550) {
+      loadGame();
+    }
   }
   
-  // Detects clicks on the save button
-  if (mouseX > 50 && mouseX < 150 && mouseY > 510 && mouseY < 550) {
-    saveGame();
-  }
-
-  // Detects clicks on the load button
-  if (mouseX > 300 && mouseX < 400 && mouseY > 510 && mouseY < 550) {
-    loadGame();
+  // Detects clicks on the start button
+  if (mouseX > 130 && mouseX < 320 && mouseY > 125 && mouseY < 185 && isGameStarted == false) {
+    isGameStarted = true;
   }
 }
 
@@ -179,6 +211,7 @@ void resetBoard() {
     }
   }
   fillCompleteBoard(); 
+  
   
   if (isEasyMode) {
     removeNumbers((int) random(10, 13)); 
@@ -233,8 +266,7 @@ void keyPressed() {
 }
 
 
-
-// Helper function to shuffle an array
+// Help function to shuffle an array
 Integer[] shuffleArray(Integer[] array) {
   for (int i = array.length - 1; i > 0; i--) {
     int j = (int) random(i + 1);
